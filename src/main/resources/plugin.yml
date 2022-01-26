@@ -1,0 +1,13 @@
+name: Rbac
+version: '${project.version}'
+main: me.gotha.rbac.Rbac
+api-version: 1.16
+authors: [ Gotha ]
+description: Role Based Access Control
+commands:
+  lobby:
+    usage: /lobby
+  feast:
+    usage: /feast
+  leave:
+    usage: /leave
