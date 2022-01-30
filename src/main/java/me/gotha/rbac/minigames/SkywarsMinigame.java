@@ -1,12 +1,14 @@
 package me.gotha.rbac.minigames;
 
-import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class SkywarsMinigame implements Minigame {
+public class SkywarsMinigame extends Skywars implements Minigame {
 
 
-    public SkywarsMinigame() {
-        this.onLobby();
+    public SkywarsMinigame(InventoryClickEvent event) {
+        super();
+        this.onLobby(event);
     }
 
     @Override
@@ -20,7 +22,14 @@ public class SkywarsMinigame implements Minigame {
     }
 
     @Override
-    public void onLobby() {
-        Bukkit.broadcastMessage("Esperando jogadores para começar 1/8");
+    public void onLobby(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+
+        this.sendInitialMessages(player);
+        this.createScoreboard(player);
+        this.movePlayerToInitialPosition(player);
+
+
     }
+
 }

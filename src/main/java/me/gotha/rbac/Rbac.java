@@ -7,7 +7,8 @@ import me.gotha.rbac.database.SQLConnection;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.Connection;
-import java.util.Date;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 
 public final class Rbac extends JavaPlugin {
@@ -15,22 +16,28 @@ public final class Rbac extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        System.out.println("Startando connection");
-        SQLConnection sqlConnection = new SQLConnection();
-        sqlConnection.connect();
-        Connection connection = sqlConnection.getConnection();
+        try {
+            System.out.println("Startando connection");
+            SQLConnection sqlConnection = new SQLConnection();
+            sqlConnection.connect();
+            Connection connection = sqlConnection.getConnection();
+
+            Statement statement = connection.createStatement();
 
 
-        LobbyCommand lobby = new LobbyCommand(connection);
-        FeastCommand feast = new FeastCommand();
-        LeaveCommand leave = new LeaveCommand(connection);
+            LobbyCommand lobby = new LobbyCommand(statement);
+            FeastCommand feast = new FeastCommand();
+            LeaveCommand leave = new LeaveCommand(statement);
 
-        System.out.println("Turn on...");
-        this.getCommand(lobby.commandName).setExecutor(lobby);
-        this.getCommand(feast.commandName).setExecutor(feast);
-        this.getCommand(leave.commandName).setExecutor(leave);
+            System.out.println("Turn on...");
+            this.getCommand(lobby.commandName).setExecutor(lobby);
+            this.getCommand(feast.commandName).setExecutor(feast);
+            this.getCommand(leave.commandName).setExecutor(leave);
 
-        getServer().getPluginManager().registerEvents(lobby, this);
+            getServer().getPluginManager().registerEvents(lobby, this);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

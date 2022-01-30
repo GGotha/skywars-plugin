@@ -1,10 +1,13 @@
 package me.gotha.rbac.minigames;
 
-interface Minigame {
+import org.bukkit.event.inventory.InventoryClickEvent;
+
+public interface Minigame {
 
     public void onStart();
 
     public void onFinish();
 
-    public void onLobby();
+    public void onLobby(InventoryClickEvent event);
+
 }

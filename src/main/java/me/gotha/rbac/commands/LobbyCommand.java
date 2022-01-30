@@ -1,10 +1,11 @@
 package me.gotha.rbac.commands;
 
-import me.gotha.rbac.utils.MinecraftPosition;
+import me.gotha.rbac.database.Queries;
 import me.gotha.rbac.minigames.SkywarsMinigame;
 import me.gotha.rbac.utils.Util;
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,28 +13,27 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class LobbyCommand implements CommandExecutor, Listener {
 
-    private Connection connection;
+    private Statement statement;
     private Integer lbyAmountPlayers = 0;
     public final String commandName = Util.capitalize("lobby");
     private ItemMeta skywarsItemMeta;
 
-    public LobbyCommand(Connection connection) {
-        this.connection = connection;
+    public LobbyCommand(Statement statement) {
+        this.statement = statement;
     }
 
 
@@ -50,11 +50,9 @@ public class LobbyCommand implements CommandExecutor, Listener {
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         if (commandSender instanceof Player) {
             try {
-                Statement statement = this.connection.createStatement();
 
-
-                String selectAllPlayersInLobbyQuery = "SELECT COUNT(*) AS lby_amount_players FROM lby_skywars WHERE active=true";
-                ResultSet resultSetSelectAllPlayersInLobbyQuery = statement.executeQuery(selectAllPlayersInLobbyQuery);
+                String selectAllPlayersInLobbyQuery = Queries.getAmountPlayersOnSkywarsLobby;
+                ResultSet resultSetSelectAllPlayersInLobbyQuery = this.statement.executeQuery(selectAllPlayersInLobbyQuery);
 
 
                 if (!resultSetSelectAllPlayersInLobbyQuery.next()) {
@@ -88,21 +86,32 @@ public class LobbyCommand implements CommandExecutor, Listener {
                 inventory.addItem(itemStackSkywarsDS);
 
                 player.openInventory(inventory);
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
+
+
         }
 
         return false;
     }
 
     @EventHandler
+    public void onPlayerDisconnect(PlayerQuitEvent event) throws SQLException {
+        Player player = event.getPlayer();
+        String playerName = player.getName();
+
+
+        String updatePlayerActiveFalseQuery = String.format(Queries.setPlayerActiveToFalse, playerName);
+        this.statement.executeUpdate(updatePlayerActiveFalseQuery);
+
+
+    }
+
+    @EventHandler
     public void onInventoryClick(InventoryClickEvent event) throws SQLException {
-        Statement statement = this.connection.createStatement();
         final boolean isInventoryTitleTheSameOfCommandName = event.getView().getTitle().equalsIgnoreCase(ChatColor.AQUA + this.commandName);
         String itemNameClickedOnInventory = event.getCurrentItem().getItemMeta().getDisplayName().toLowerCase();
-//        String skywarsItemName = this.getSkywarsItemMeta().getDisplayName().toLowerCase();
         String skywarsItemName = this.skywarsItemMeta.getDisplayName().toLowerCase();
 
         final boolean isSkywarsItem = itemNameClickedOnInventory.equals(skywarsItemName);
@@ -114,10 +123,9 @@ public class LobbyCommand implements CommandExecutor, Listener {
 
         Player player = (Player) event.getWhoClicked();
         String playerName = player.getName();
-        World world = player.getWorld();
 
-        String selectAllPlayersInLobbyQuery = "SELECT COUNT(*) AS lby_amount_players FROM lby_skywars WHERE active = true";
-        ResultSet resultSetSelectAllPlayersInLobbyQuery = statement.executeQuery(selectAllPlayersInLobbyQuery);
+        String selectAllPlayersInLobbyQuery = Queries.getAmountPlayersOnSkywarsLobby;
+        ResultSet resultSetSelectAllPlayersInLobbyQuery = this.statement.executeQuery(selectAllPlayersInLobbyQuery);
 
 
         if (!resultSetSelectAllPlayersInLobbyQuery.next()) {
@@ -127,59 +135,36 @@ public class LobbyCommand implements CommandExecutor, Listener {
 
         setLbyAmountPlayers(Integer.parseInt(resultSetSelectAllPlayersInLobbyQuery.getString("lby_amount_players")));
 
-        Bukkit.broadcastMessage(resultSetSelectAllPlayersInLobbyQuery.getString("lby_amount_players"));
+
+        String selectUserNameWithTheSamePlayerNameAndMustBeActiveQuery = String.format(Queries.getPlayerWithTheSameNameAndActiveTrue, playerName);
+        ResultSet resultSetSelectUserNameWithTheSamePlayerNameAndMustBeActiveQuery = this.statement.executeQuery(selectUserNameWithTheSamePlayerNameAndMustBeActiveQuery);
 
 
-        String selectUserNameWithTheSamePlayerNameQuery = String.format("SELECT * FROM lby_skywars WHERE user_name = '%s'", playerName);
-
-
-        String insertPlayerToTableQuery = String.format("INSERT INTO lby_skywars (user_name, active, created_at, updated_at) VALUES ('%s', true, '2021-05-25', '2021-05-25');", playerName);
-
-
-        ResultSet resultSetSelectUserNameWithTheSamePlayerNameQuery = statement.executeQuery(selectUserNameWithTheSamePlayerNameQuery);
-
-
-        if (resultSetSelectUserNameWithTheSamePlayerNameQuery.next()) {
+        if (resultSetSelectUserNameWithTheSamePlayerNameAndMustBeActiveQuery.next()) {
             Bukkit.broadcastMessage(ChatColor.RED + "Você já nesse lobby!");
             event.setCancelled(true);
-        }
+        } else {
+            String selectUserNameWithTheSamePlayerNameQuery = String.format(Queries.getPlayerWithTheSameNameAndActiveFalse, playerName);
+            ResultSet resultSetSelectUserNameWithTheSamePlayerNameQuery = this.statement.executeQuery(selectUserNameWithTheSamePlayerNameQuery);
+
+            Bukkit.broadcastMessage(resultSetSelectUserNameWithTheSamePlayerNameQuery.toString());
+
+            if (resultSetSelectUserNameWithTheSamePlayerNameQuery.next()) {
+                String setActiveTruePlayerQuery = String.format(Queries.updatePlayerWithActiveTrue, playerName);
+                this.statement.executeUpdate(setActiveTruePlayerQuery);
+                event.setCancelled(true);
+            } else {
+                String insertPlayerToTableQuery = String.format(Queries.createPlayer, playerName);
+                this.statement.executeUpdate(insertPlayerToTableQuery);
+            }
 
 
-        statement.executeUpdate(insertPlayerToTableQuery);
+            if (isInventoryTitleTheSameOfCommandName && isSkywarsItem) {
+                new SkywarsMinigame(event);
 
 
-        if (isInventoryTitleTheSameOfCommandName && isSkywarsItem) {
-            Bukkit.broadcastMessage(StringUtils.repeat(" \n", 100));
-            Bukkit.broadcastMessage(ChatColor.GREEN + "O jogador " + player.getName() + " entrou no lobby de skywars!");
-
-
-            ArrayList<MinecraftPosition> minecraftPositions = new ArrayList<MinecraftPosition>();
-
-            minecraftPositions.add(new MinecraftPosition(26.70, 17.20, -9.30));
-            minecraftPositions.add(new MinecraftPosition(-24.30, 17.20, 10.70));
-            minecraftPositions.add(new MinecraftPosition(-11.30, 17.20, -9.70));
-            minecraftPositions.add(new MinecraftPosition(7.30, 17.20, -22.30));
-            minecraftPositions.add(new MinecraftPosition(40.30, 17.20, 9.645));
-            minecraftPositions.add(new MinecraftPosition(26.30, 17.20, 28.70));
-            minecraftPositions.add(new MinecraftPosition(8.70, 17.20, 42.30));
-            minecraftPositions.add(new MinecraftPosition(-11.30, 17.20, 28.30));
-
-            Random random = new Random();
-            int randomIndex = random.nextInt(8);
-
-            MinecraftPosition selectedPlayerPosition = minecraftPositions.get(randomIndex);
-
-            double x = selectedPlayerPosition.getX();
-            double y = selectedPlayerPosition.getY();
-            double z = selectedPlayerPosition.getZ();
-
-            Location location = new Location(world, x, y, z);
-
-            player.teleport(location);
-
-
-            SkywarsMinigame skywarsMinigame = new SkywarsMinigame();
-            event.setCancelled(true);
+                event.setCancelled(true);
+            }
         }
 
 
