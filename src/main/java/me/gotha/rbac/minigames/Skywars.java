@@ -14,6 +14,7 @@ import java.util.Random;
 
 abstract class Skywars {
 
+
     public void createScoreboard(Player player) {
 
         ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
@@ -68,12 +69,13 @@ abstract class Skywars {
         player.teleport(location);
 
     }
+
     public void sendInitialMessages(Player player) {
         String playerName = player.getName();
 
-//        Bukkit.broadcastMessage(StringUtils.repeat(" \n", 100));
+        Bukkit.broadcastMessage(StringUtils.repeat(" \n", 100));
         Bukkit.broadcastMessage(ChatColor.GREEN + "O jogador " + playerName + " entrou no lobby de skywars!");
-        Bukkit.broadcastMessage("Esperando jogadores para começar 1/8");
+
 
     }
 

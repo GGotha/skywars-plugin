@@ -33,6 +33,7 @@ public class LeaveCommand implements CommandExecutor {
             String updatePlayerActiveFalseQuery = String.format(Queries.setPlayerActiveToFalse, playerName);
             this.statement.executeUpdate(updatePlayerActiveFalseQuery);
 
+            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 
             Bukkit.broadcastMessage(ChatColor.GREEN + "Você saiu do lobby!");
 

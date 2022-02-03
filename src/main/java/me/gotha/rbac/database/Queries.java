@@ -7,4 +7,5 @@ public class Queries {
     public static String getPlayerWithTheSameNameAndActiveFalse = "SELECT * FROM lby_skywars WHERE user_name = '%s' AND active=false;";
     public static String getPlayerWithTheSameNameAndActiveTrue = "SELECT * FROM lby_skywars WHERE user_name = '%s' AND active=true;";
     public static String setPlayerActiveToFalse = "UPDATE lby_skywars SET active = false WHERE user_name = '%s';";
+    public static String setAllPlayersActiveToFalse = "UPDATE lby_skywars SET active = false;";
 }

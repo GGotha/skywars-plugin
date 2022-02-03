@@ -141,13 +141,11 @@ public class LobbyCommand implements CommandExecutor, Listener {
 
 
         if (resultSetSelectUserNameWithTheSamePlayerNameAndMustBeActiveQuery.next()) {
-            Bukkit.broadcastMessage(ChatColor.RED + "Você já nesse lobby!");
+            Bukkit.broadcastMessage(ChatColor.RED + "Você já está nesse lobby!");
             event.setCancelled(true);
         } else {
             String selectUserNameWithTheSamePlayerNameQuery = String.format(Queries.getPlayerWithTheSameNameAndActiveFalse, playerName);
             ResultSet resultSetSelectUserNameWithTheSamePlayerNameQuery = this.statement.executeQuery(selectUserNameWithTheSamePlayerNameQuery);
-
-            Bukkit.broadcastMessage(resultSetSelectUserNameWithTheSamePlayerNameQuery.toString());
 
             if (resultSetSelectUserNameWithTheSamePlayerNameQuery.next()) {
                 String setActiveTruePlayerQuery = String.format(Queries.updatePlayerWithActiveTrue, playerName);
