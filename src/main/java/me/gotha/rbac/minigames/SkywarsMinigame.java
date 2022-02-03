@@ -3,8 +3,6 @@ package me.gotha.rbac.minigames;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.sql.Statement;
-
 public class SkywarsMinigame extends Skywars implements Minigame {
 
 
@@ -30,8 +28,6 @@ public class SkywarsMinigame extends Skywars implements Minigame {
         this.sendInitialMessages(player);
         this.createScoreboard(player);
         this.movePlayerToInitialPosition(player);
-
-
     }
 
 }
