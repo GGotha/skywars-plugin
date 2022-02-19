@@ -58,9 +58,11 @@ public final class Rbac extends JavaPlugin {
     public void onDisable() {
         System.out.println("Turn off...");
         try {
-            String updateAllPlayersActiveFalseQuery = Queries.setAllPlayersActiveToFalse;
+            String disableLobby = "UPDATE lobbies SET active = false WHERE active=true;";
+            String disablePlayersOnLobby = "UPDATE lobby_players SET active = false WHERE active=true;";
 
-            this.statement.executeUpdate(updateAllPlayersActiveFalseQuery);
+            this.statement.executeUpdate(disableLobby);
+            this.statement.executeUpdate(disablePlayersOnLobby);
         } catch (SQLException e) {
             e.printStackTrace();
         }

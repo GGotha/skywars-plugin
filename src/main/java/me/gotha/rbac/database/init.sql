@@ -32,5 +32,5 @@ CREATE TABLE IF NOT EXISTS lobby_players (
        FOREIGN KEY (id_player) REFERENCES players(id)
 );
 
-INSERT INTO minigames VALUES ("Skywars", true, DATE('now'), null);
-INSERT INTO minigames VALUES ("Bedwars", false, DATE('now'), null);
+INSERT INTO minigames VALUES ('Skywars', true, DATE('now'), null);
+INSERT INTO minigames VALUES ('Bedwars', false, DATE('now'), null);

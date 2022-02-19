@@ -5,11 +5,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class SkywarsMinigame extends Skywars implements Minigame {
 
+    public int idLobby;
 
     public SkywarsMinigame(InventoryClickEvent event) {
         super();
         this.onLobby(event);
     }
+
 
     @Override
     public void onStart() {
@@ -24,6 +26,7 @@ public class SkywarsMinigame extends Skywars implements Minigame {
     @Override
     public void onLobby(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
+
 
         this.sendInitialMessages(player);
         this.createScoreboard(player);
