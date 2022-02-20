@@ -1,24 +1,20 @@
 package me.gotha.rbac.minigames;
 
+import org.bukkit.event.inventory.InventoryClickEvent;
+
+import java.sql.Statement;
+
 public class LobbyParameters {
     public int idLobby;
     public int idPlayer;
+    public Statement statement;
+    public InventoryClickEvent event;
 
-
-    public int getIdLobby() {
-        return idLobby;
-    }
-
-
-    public int getIdPlayer() {
-        return idPlayer;
-    }
-
-
-    public LobbyParameters(int idLobby, int idPlayer) {
-        this.idLobby = idLobby;
-        this.idPlayer = idPlayer;
-
+    public LobbyParameters(InventoryClickEvent event, Statement statement, int id_lobby, int id_player) {
+        this.event = event;
+        this.statement = statement;
+        this.idLobby = id_lobby;
+        this.idPlayer = id_player;
     }
 
 

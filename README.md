@@ -31,6 +31,7 @@
 - User can leave of Skywars lobby ✅
 - Create new database structure ✅
 - Integrate the new database structure ✅
+- Create a new skywars world for each lobby ✅
 - Create counter on user screen when the lobby starts ❌
 - Stars lobby when reach 4 players ❌
 - Regenerate world when Skywars end ❌

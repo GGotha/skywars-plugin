@@ -4,6 +4,7 @@ main: me.gotha.rbac.Rbac
 api-version: 1.16
 authors: [ Gotha ]
 description: Role Based Access Control
+depend: [Multiverse-Core]
 commands:
   lobby:
     usage: /lobby
@@ -11,3 +12,5 @@ commands:
     usage: /feast
   leave:
     usage: /leave
+  create:
+    usage: /create

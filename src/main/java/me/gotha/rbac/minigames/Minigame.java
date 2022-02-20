@@ -8,6 +8,6 @@ public interface Minigame {
 
     public void onFinish();
 
-    public void onLobby(InventoryClickEvent event);
+    public void onLobby();
 
 }

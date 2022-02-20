@@ -1,15 +1,19 @@
 package me.gotha.rbac;
 
+import me.gotha.rbac.commands.CreateCommand;
 import me.gotha.rbac.commands.FeastCommand;
 import me.gotha.rbac.commands.LeaveCommand;
 import me.gotha.rbac.commands.LobbyCommand;
 import me.gotha.rbac.database.Queries;
 import me.gotha.rbac.database.SQLConnection;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import static org.bukkit.Bukkit.getServer;
 
 
 public final class Rbac extends JavaPlugin {
@@ -32,23 +36,21 @@ public final class Rbac extends JavaPlugin {
             this.createConnection();
 
 
-//            SQLConnection sqlConnection = new SQLConnection();
-//            sqlConnection.connect();
-//            Connection connection = sqlConnection.getConnection();
-//
-//            Statement statement = connection.createStatement();
             System.out.println("Turn on...");
 
             LobbyCommand lobby = new LobbyCommand(this.statement);
             FeastCommand feast = new FeastCommand();
             LeaveCommand leave = new LeaveCommand(this.statement);
+            CreateCommand create = new CreateCommand();
 
 
             this.getCommand(lobby.commandName).setExecutor(lobby);
             this.getCommand(feast.commandName).setExecutor(feast);
             this.getCommand(leave.commandName).setExecutor(leave);
+            this.getCommand(create.commandName).setExecutor(create);
 
             getServer().getPluginManager().registerEvents(lobby, this);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

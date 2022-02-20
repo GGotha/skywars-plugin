@@ -1,6 +1,7 @@
 package me.gotha.rbac.commands;
 
 import me.gotha.rbac.utils.Util;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,6 +12,8 @@ import org.bukkit.entity.Player;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import static org.bukkit.Bukkit.getServer;
 
 public class LeaveCommand implements CommandExecutor {
 
@@ -42,10 +45,13 @@ public class LeaveCommand implements CommandExecutor {
 
                 player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 
+                getServer().dispatchCommand(player, "mv tp world_main");
+
+                Bukkit.broadcastMessage(StringUtils.repeat(" \n", 100));
                 Bukkit.broadcastMessage(ChatColor.GREEN + "Você saiu do lobby!");
             }else {
-
-                Bukkit.broadcastMessage(ChatColor.GREEN + "Você não está em nenhum lobby!");
+                Bukkit.broadcastMessage(StringUtils.repeat(" \n", 100));
+                Bukkit.broadcastMessage(ChatColor.RED + "Você não está em nenhum lobby!");
             }
 
 

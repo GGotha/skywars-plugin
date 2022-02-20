@@ -2,6 +2,7 @@ package me.gotha.rbac.commands;
 
 import me.gotha.rbac.database.Queries;
 import me.gotha.rbac.minigames.LobbyParameters;
+import me.gotha.rbac.minigames.Levels;
 import me.gotha.rbac.minigames.SkywarsMinigame;
 import me.gotha.rbac.utils.Util;
 import org.bukkit.Bukkit;
@@ -13,6 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -114,8 +116,26 @@ public class LobbyCommand implements CommandExecutor, Listener {
             String updateActivePlayer = String.format("UPDATE lobby_players SET active = false WHERE id_player = %s and active = true;", idPlayer);
             this.statement.executeUpdate(updateActivePlayer);
         }
+    }
 
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) throws SQLException {
+        Player player = event.getEntity().getPlayer();
+        String playerName = player.getName();
 
+        String getPlayer = String.format("SELECT * FROM players WHERE name = '%s';", playerName);
+        ResultSet getPlayerResultSet = this.statement.executeQuery(getPlayer);
+
+        int idPlayer;
+
+        if (getPlayerResultSet.next()) {
+            idPlayer = getPlayerResultSet.getInt("id");
+
+            String updateActivePlayer = String.format("UPDATE lobby_players SET active = false WHERE id_player = %s and active = true;", idPlayer);
+            this.statement.executeUpdate(updateActivePlayer);
+
+            player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        }
     }
 
     @EventHandler
@@ -161,9 +181,13 @@ public class LobbyCommand implements CommandExecutor, Listener {
             }
         }
 
+        String lobbyLevel = Levels.selectRandomlyALevel();
+
+        Bukkit.broadcastMessage("CHEGA AQUI::" + lobbyLevel);
+
 
         if (!isValidLobby) {
-            String insertLobbyQuery = Queries.createLobby;
+            String insertLobbyQuery = String.format(Queries.createLobby, lobbyLevel);
             this.statement.executeUpdate(insertLobbyQuery);
 
             ResultSet result = this.statement.getGeneratedKeys();
@@ -174,6 +198,7 @@ public class LobbyCommand implements CommandExecutor, Listener {
                 id_lobby = (int) object;
             }
         }
+
 
         String getPlayerWithTheSameName = String.format("SELECT * FROM players WHERE name = '%s';", playerName);
         ResultSet getPlayerWithTheSameNameResultSet = this.statement.executeQuery(getPlayerWithTheSameName);
@@ -213,8 +238,8 @@ public class LobbyCommand implements CommandExecutor, Listener {
 
             this.statement.executeUpdate(insertPlayerOnLobby);
 
-            new LobbyParameters(id_lobby, id_player);
-            new SkywarsMinigame(event);
+//            new LobbyParameters(id_lobby, id_player);
+            new SkywarsMinigame(new LobbyParameters(event, statement, id_lobby, id_player));
         } else {
             Bukkit.broadcastMessage(ChatColor.RED + "Você já está nesse lobby!");
         }
