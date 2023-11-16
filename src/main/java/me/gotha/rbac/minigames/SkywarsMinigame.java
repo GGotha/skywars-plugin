@@ -46,7 +46,7 @@ public class SkywarsMinigame extends Skywars implements Minigame {
 
             this.movePlayerToMap(this.event, this.statement, this.idLobby, this.idPlayer);
 
-            this.movePlayerToInitialPosition(player);
+//            this.movePlayerToInitialPosition(player);
 
         } catch (SQLException e) {
             e.printStackTrace();
